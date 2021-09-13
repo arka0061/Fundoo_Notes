@@ -8,6 +8,24 @@ class userService {
                 callback(null, data);
             }
         });
-    }; 
+    };
+    loginUser = (loginInfo, callback) => {
+        userModel.loginUser(loginInfo, (err, data) => {
+            if (data) {
+                const check=loginInfo.password== data.password
+                    if (check==false)
+                     {
+                        callback('Invalid Password', null);
+                    }
+                    else
+                     {
+                        callback(null, data);
+                    }                 
+                
+            } else {
+                callback('Please check your email id and password');
+            }
+        });
+    }
 }
 module.exports = new userService();
