@@ -30,6 +30,34 @@ class Controller {
             });
         }
     }
+    login = (req, res) => {
+        try {
+            const loginInfo = {
+                email: req.body.email,
+                password: req.body.password
+            }                     
+            userService.loginUser(loginInfo, (error, data) => {
+                if (error) {
+                    return res.status(403).json({
+                        success: false,
+                        message: "Incorrect Email And Password!",
+                        error,
+                    });
+                }                     
+                    return res.status(200).json({
+                        success: true,
+                        message: "User successfully logged In",
+                        data,
+                    });              
+            });
+        } catch (error) {
+            return res.status(500).send({
+                success: false,
+                message: 'Internal server error',
+                data,
+            });
+        }
+    }
     
 }
 module.exports = new Controller();
