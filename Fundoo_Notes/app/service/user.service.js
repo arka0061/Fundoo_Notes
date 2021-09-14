@@ -1,5 +1,8 @@
 const userModel = require('../models/user.model.js')
 const bcrypt = require('bcryptjs');
+const jwt=require('jsonwebtoken');
+
+const JWT_SECRET='@1287hbkjasbdque1db19b39u21adnkanjNjn@asdassd24v43b91b'
 class userService {
     registerUser = (user, callback) => {
         userModel.registerUser(user, (err, data) => {
@@ -18,10 +21,13 @@ class userService {
                         return callback('Invalid Password', null);
                     }
                     else {
-                        return callback(null, data);
+                        const token=jwt.sign({
+                            id:data._id,
+                            username:data.firstName
+                        },JWT_SECRET)
+                        return callback(null, token);
                     }
                 })
-
             } else {
                 return callback('Please check your email id and password');
             }
