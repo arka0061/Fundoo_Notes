@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const saltRounds = 10;
 
 const userSchema = mongoose.Schema({
     firstName: {
@@ -28,20 +30,41 @@ const user = mongoose.model('user', userSchema);
 
 class userModel {
 
-    registerUser = async(userDetails,callback) => {
+    registerUser = (userDetails, callback) => {
+
         const newUser = new user({
-            firstName:userDetails.firstName,
+            firstName: userDetails.firstName,
             lastName: userDetails.lastName,
             email: userDetails.email,
-            password:userDetails.password,
+            password: userDetails.password,
         });
-       const data= await user.findOne({ firstName: userDetails.firstName });
-        if (data) {
-           callback('User already exist',data)
-            }
-         else {
-                 const result= await newUser.save();
-               callback(null,result);
+        try {
+            user.findOne({ email: userDetails.email }, (err, data) => {
+                if (data) {
+                    return callback('User already exist', null)
+                }
+                else {
+                    bcrypt.genSalt(saltRounds, function (err, salt) {
+                        if (err) {
+                            throw err;
+                        }
+                        else {
+                            bcrypt.hash(userDetails.password, salt, function (err, hash) {
+                                if (err) {
+                                    throw err;
+                                } else {
+                                    newUser.password = hash;
+                                    newUser.save();
+                                    return callback(null, newUser);
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
+        catch (error) {
+            return callback('Internal Error', null)
         }
     }
     loginUser = (loginData, callBack) => {
